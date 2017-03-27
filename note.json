@@ -1,0 +1,878 @@
+{
+  "paragraphs": [
+    {
+      "text": "print(\"%angular \u003ch3\u003eSimple Classfication Example\u003c/h3\u003e\u003ch4\u003e Dataset from UCI Machine Learning Repository:\u003c/h4\u003e \u003cdiv ng-init\u003d\\\"myVar \u003d \u0027https://archive.ics.uci.edu/ml/datasets/Letter+Recognition\u0027\\\"\u003e\u003ca ng-href\u003d\\\"{{myVar}}\\\"\u003e{{myVar}}\u003c/a\u003e\u003c/div\u003e\")",
+      "user": "anonymous",
+      "dateUpdated": "Mar 23, 2017 7:37:47 PM",
+      "config": {
+        "colWidth": 12.0,
+        "enabled": true,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "table",
+              "height": 94.0,
+              "optionOpen": false
+            }
+          }
+        },
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false
+        },
+        "editorMode": "ace/mode/python",
+        "editorHide": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "ANGULAR",
+            "data": "\u003ch3\u003eSimple Classfication Example\u003c/h3\u003e\u003ch4\u003e Dataset from UCI Machine Learning Repository:\u003c/h4\u003e \u003cdiv ng-init\u003d\"myVar \u003d \u0027https://archive.ics.uci.edu/ml/datasets/Letter+Recognition\u0027\"\u003e\u003ca ng-href\u003d\"{{myVar}}\"\u003e{{myVar}}\u003c/a\u003e\u003c/div\u003e\n"
+          }
+        ]
+      },
+      "apps": [],
+      "jobName": "paragraph_1490255238928_-1266981709",
+      "id": "20170323-004718_215195269",
+      "dateCreated": "Mar 23, 2017 12:47:18 AM",
+      "dateStarted": "Mar 23, 2017 7:37:47 PM",
+      "dateFinished": "Mar 23, 2017 7:37:47 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%python\nprint(\"%angular \u003ch3\u003eImporting Data. Expand editor for more information.\u003c/h3\u003e\")\nimport os\nimport copy\nimport math\nimport operator\nimport random\n\nfrom functools import reduce\n\ndef load_data(filename):\n    path \u003d os.path.dirname(os.getcwd()) + \"\\\\data\\\\\" + filename\n    with open(path) as f:\n        data \u003d []\n        for line in f:\n            line \u003d line.strip()\n            line \u003d line.split(\",\")\n            for elem in range(len(line)):\n                if line[elem].isdigit():\n                    line[elem] \u003d int(line[elem])\n            data.append(line)\n    return data\n\ndata \u003d load_data(\"letters.txt\")",
+      "user": "anonymous",
+      "dateUpdated": "Mar 26, 2017 8:55:22 PM",
+      "config": {
+        "colWidth": 6.0,
+        "enabled": true,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "table",
+              "height": 300.0,
+              "optionOpen": false
+            }
+          }
+        },
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false
+        },
+        "editorMode": "ace/mode/python",
+        "editorHide": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "ANGULAR",
+            "data": "\u003ch3\u003eImporting Data. Expand editor for more information.\u003c/h3\u003e\n"
+          }
+        ]
+      },
+      "apps": [],
+      "jobName": "paragraph_1489771279310_1536713881",
+      "id": "20170317-102119_2135924314",
+      "dateCreated": "Mar 17, 2017 10:21:19 AM",
+      "dateStarted": "Mar 26, 2017 8:55:17 PM",
+      "dateFinished": "Mar 26, 2017 8:55:21 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%python\nimport time\nprint(\"%angular \u003ch3\u003eProcessing Data. Expand editor for more information.\u003c/h3\u003e\")\n\ndef mult_sim(from_cluster, classify, distance_fn \u003d None):\n    #for this dataset, value is capped at 15\n    denom \u003d 15.0\n    \n    #default value for when attribute is completely none existant in one but maximally existant in other\n    default_val \u003d 0.1\n    \n    similarity_lst \u003d []\n    for elem in range(len(from_cluster)):\n        if elem \u003d\u003d 0:\n            continue\n        else:\n            attr_similarity \u003d 1-(abs(from_cluster[elem]/denom - classify[elem]/denom))\n            if(attr_similarity \u003d\u003d 0):\n                similarity_lst.append(default_val)\n            else:\n                similarity_lst.append(attr_similarity)\n    return reduce(operator.mul, similarity_lst)\n\n#inversely related similarity    \ndef shepard_sim(from_cluster, classify, distance_fn):\n    return math.exp(-distance_fn(from_cluster, classify))\n    \n#\"training\" phase. Take first 16,000 items as labeled data.\n#take first 16,000 since it was the suggested number in the data set expalantion(20,000 total instances).\n\ndef categorize_by_label(data, lower\u003d0, upper\u003d16000):\n    alphabet \u003d \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\"\n    trained_data \u003d []\n    for i in range(len(alphabet)):\n        trained_data.append([])\n    for i in range(lower, upper):\n        index \u003d alphabet.index(data[i][0])\n        trained_data[index].append(data[i])\n    return trained_data\n\ntrained_data \u003d categorize_by_label(data)\n\n#create a prototype alphabet by averaging values of each attribute for all instances labeled as the said alpabet.\ndef prototypes_average(trained_data):\n    prototype_lst \u003d []\n    for category in trained_data:\n        prototype \u003d [[category[0][0],0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]]\n        for instance in range(len(category)):\n            for attribute in range(1, len(category[instance])):\n                prototype[0][attribute] +\u003d category[instance][attribute]\n        \n        for i in range(1, len(prototype[0])):\n            prototype[0][i] /\u003d len(category)\n        prototype_lst.append(prototype)\n    return prototype_lst\n\navg_proto \u003d prototypes_average(trained_data)\n\n#create prototype alphabet by collecting most frequent values within each attributes (among trained data)\ndef prototypes_frequency(trained_data):\n    frequency \u003d []\n    prototype_lst \u003d []\n    for i in range(len(trained_data[0][0])):\n        frequency.append([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])\n    \n    \n    for category in trained_data:\n        attr_frequency \u003d copy.deepcopy(frequency)\n        prototype \u003d [[category[0][0],0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]]\n        for instance in range(len(category)):\n             for attribute in range(1, len(category[instance])):\n                    attr_frequency[attribute][category[instance][attribute]] +\u003d 1\n        \n        for count_per_attr in range(1, len(attr_frequency)):\n            val \u003d attr_frequency[count_per_attr].index(max(attr_frequency[count_per_attr]))\n            prototype[0][count_per_attr] \u003d val\n        prototype_lst.append(prototype)\n    return prototype_lst\n\nfreq_proto \u003d prototypes_frequency(trained_data)\n\ndef euclidean_distance(from_cluster, classify):\n    distance \u003d 0\n    for attribute in range(len(from_cluster)):\n        if attribute \u003d\u003d 0:\n            continue\n        else:\n            distance+\u003d math.pow(from_cluster[attribute]-classify[attribute], 2)\n    return math.sqrt(distance)\n\n#context model\ndef context_model(categorized_data, data, similarity_fn, distance_fn\u003dNone, lower\u003d16000, upper\u003d20000):\n    alphabet \u003d \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\"\n    categorized \u003d []\n    initial_sum_similarity \u003d []\n    \n    #make template for initial category and similarity\n    for category in alphabet:\n        categorized.append([[category]])\n        initial_sum_similarity.append(0.0)\n    \n    #for each new stimuli to classify, compare it to instances in a category and accumulate their \"similarity score\". Repeat for every category for each instance.\n    for stimuli in range(lower, upper):\n        sum_similarities \u003d copy.deepcopy(initial_sum_similarity)\n        percent \u003d copy.deepcopy(initial_sum_similarity)\n        \n        for category in range(len(categorized_data)):\n            for instance in range(len(categorized_data[category])):\n                sum_similarities[category] +\u003d similarity_fn(categorized_data[category][instance], data[stimuli], distance_fn)\n        total_sum_similarity \u003d 0.0\n        \n        for similarity_val in range(len(sum_similarities)):\n            sum_similarities[similarity_val] /\u003d len(categorized_data[similarity_val])\n            total_sum_similarity +\u003d sum_similarities[similarity_val]\n        \n        for i in range(len(percent)):\n            percent[i] \u003d sum_similarities[i]/total_sum_similarity\n        index \u003d percent.index(max(percent))\n        categorized[index].append(data[stimuli])\n        \n    return categorized\n\n\ncontext_start \u003d time.time()\ncontext \u003d context_model(trained_data, data, shepard_sim, euclidean_distance)\ncontext_time \u003d time.time() - context_start\n\ndef prototype_model(prototypes, data, similarity_fn, distance_fn\u003dNone, lower\u003d16000, upper\u003d20000):\n    categorized \u003d copy.deepcopy(prototypes)\n    \n    for stimuli in range(lower, upper):\n        similarity \u003d [float(\"-infinity\"), -1]\n        for prototype in range(len(prototypes)):\n            cur_similarity \u003d similarity_fn(prototypes[prototype][0], data[stimuli], distance_fn)\n            if cur_similarity \u003e similarity[0]:\n                similarity[0] \u003d cur_similarity\n                similarity[1] \u003d prototype\n        categorized[similarity[1]].append(data[stimuli])\n    return categorized\n\nproto_freq_start \u003d time.time()\nprototype_freq \u003d prototype_model(freq_proto, data, mult_sim, euclidean_distance)\nproto_freq_time \u003d time.time() - proto_freq_start\n\nproto_avg_start \u003d time.time()\nprototype_avg \u003d prototype_model(avg_proto, data, mult_sim, euclidean_distance)\nproto_avg_time \u003d time.time() - proto_avg_start\n\n#Result string\ndef result(data):\n    categorized_data \u003d data\n    #[True Assignment, right, wrong, total]\n    confusion_matrix \u003d []\n    for category in categorized_data:\n        confusion_matrix.append([category[0][0], 0, 0, 0])\n        \n    for category in range(len(categorized_data)):\n        for instance in range(1, len(categorized_data[category])):\n            if categorized_data[category][0][0] \u003d\u003d categorized_data[category][instance][0]:\n                confusion_matrix[category][1] +\u003d 1\n                confusion_matrix[category][3] +\u003d 1\n            else:\n                confusion_matrix[category][2] +\u003d 1\n                confusion_matrix[category][3] +\u003d 1\n    confusion_table \u003d \"True Assignment\\tright\\twrong\\ttotal\\n\"\n    confusion_table_total \u003d confusion_table\n    total_right \u003d 0\n    total_wrong \u003d 0\n    total \u003d 0\n    for category in confusion_matrix:\n        total +\u003d category[3]\n        total_right +\u003d category[1]\n        total_wrong +\u003d category[2]\n        confusion_table +\u003d category[0] +\"\\t\" + str(category[1])  +\"\\t\" + str(category[2]) +\"\\t\" + str(category[3]) + \"\\n\"\n    confusion_table_total +\u003d \"Total\" + \"\\t\" + str(total_right) + \"\\t\" + str(total_wrong) + \"\\t\" + str(total)\n    \n    return confusion_table, confusion_table_total, (total_right/1.0)/total",
+      "user": "anonymous",
+      "dateUpdated": "Mar 24, 2017 12:07:13 AM",
+      "config": {
+        "colWidth": 6.0,
+        "enabled": true,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "table",
+              "height": 300.0,
+              "optionOpen": false
+            }
+          },
+          "1": {
+            "graph": {
+              "mode": "table",
+              "height": 300.0,
+              "optionOpen": false
+            },
+            "helium": {}
+          }
+        },
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false
+        },
+        "editorMode": "ace/mode/python",
+        "editorHide": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "ANGULAR",
+            "data": "\u003ch3\u003eProcessing Data. Expand editor for more information.\u003c/h3\u003e\n"
+          }
+        ]
+      },
+      "apps": [],
+      "jobName": "paragraph_1489772979320_-1066444102",
+      "id": "20170317-104939_285049227",
+      "dateCreated": "Mar 17, 2017 10:49:39 AM",
+      "dateStarted": "Mar 23, 2017 11:51:54 PM",
+      "dateFinished": "Mar 24, 2017 12:05:01 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%md\nDataset used is from UCI Machine Learning Repository (link in the first paragraph), which has data about various fonts for alphabet divided into 16 numerical values ranging from 0 to 15.",
+      "user": "anonymous",
+      "dateUpdated": "Mar 23, 2017 7:40:16 PM",
+      "config": {
+        "colWidth": 12.0,
+        "enabled": true,
+        "results": {},
+        "editorSetting": {
+          "language": "markdown",
+          "editOnDblClick": true
+        },
+        "editorMode": "ace/mode/markdown",
+        "editorHide": true,
+        "tableHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003cdiv class\u003d\"markdown-body\"\u003e\n\u003cp\u003eDataset used is from UCI Machine Learning Repository (link in the first paragraph), which has data about various fonts for alphabet divided into 16 numerical values ranging from 0 to 15.\u003c/p\u003e\n\u003c/div\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "jobName": "paragraph_1490323100087_-457239702",
+      "id": "20170323-193820_1090311800",
+      "dateCreated": "Mar 23, 2017 7:38:20 PM",
+      "dateStarted": "Mar 23, 2017 7:40:16 PM",
+      "dateFinished": "Mar 23, 2017 7:40:16 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%md\nIn this note, I\u0027d like to show a few of the simple similarity metrics and models based on a few classification theories.\nFirst up is prototype model; Prototype model assumes that people distinguish between similar and dissimilar items by creating a prototype of each category they encounter in life. \nThus in this model we make a prototype for each alphabet and calculate the distance between this prototype alphabet and the alphabet to be classified.\n\nFor creating prototypes, I used average approach and frequency approach. Average approach averages each group of attributes for each alphabet to find prototype. \nFrequency approach look for the most common value each alphabet have for each attribute.\n\nSimilarity metric used is multiplicative similarity, which calculates distance between two items by \n$$\\prod\\limits_{i\u003d1}^n 1-(p_i - t_i)$$\nWhere n \u003d number of attributes, p \u003d prototype item, t \u003d target item.\n",
+      "user": "anonymous",
+      "dateUpdated": "Mar 23, 2017 7:36:40 PM",
+      "config": {
+        "colWidth": 12.0,
+        "enabled": true,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "table",
+              "height": 264.0,
+              "optionOpen": false
+            }
+          }
+        },
+        "editorSetting": {
+          "language": "markdown",
+          "editOnDblClick": true
+        },
+        "editorMode": "ace/mode/markdown",
+        "editorHide": true,
+        "tableHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003cdiv class\u003d\"markdown-body\"\u003e\n\u003cp\u003eIn this note, I\u0026rsquo;d like to show a few of the simple similarity metrics and models based on a few classification theories.\u003cbr/\u003eFirst up is prototype model; Prototype model assumes that people distinguish between similar and dissimilar items by creating a prototype of each category they encounter in life.\u003cbr/\u003eThus in this model we make a prototype for each alphabet and calculate the distance between this prototype alphabet and the alphabet to be classified.\u003c/p\u003e\n\u003cp\u003eFor creating prototypes, I used average approach and frequency approach. Average approach averages each group of attributes for each alphabet to find prototype.\u003cbr/\u003eFrequency approach look for the most common value each alphabet have for each attribute.\u003c/p\u003e\n\u003cp\u003eSimilarity metric used is multiplicative similarity, which calculates distance between two items by\u003cbr/\u003e$$\\prod\\limits_{i\u003d1}^n 1-(p_i - t_i)$$\u003cbr/\u003eWhere n \u003d number of attributes, p \u003d prototype item, t \u003d target item.\u003c/p\u003e\n\u003c/div\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "jobName": "paragraph_1490246697159_2131813298",
+      "id": "20170322-222457_1044378170",
+      "dateCreated": "Mar 22, 2017 10:24:57 PM",
+      "dateStarted": "Mar 23, 2017 7:34:48 PM",
+      "dateFinished": "Mar 23, 2017 7:34:51 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%python\nproto_table_freq, proto_table_freq_total, proto_freq_percent \u003d result(prototype_freq)\nproto_table_avg, proto_table_avg_total, proto_avg_percent \u003d result(prototype_avg)\n\n\nprint(\"%angular \u003ch3\u003ePrototype Model - Average\u003c/h3\u003e\")\nprint(\"%table \" + proto_table_avg)\nprint(\"%table \" + proto_table_avg_total)\n",
+      "user": "anonymous",
+      "dateUpdated": "Mar 24, 2017 12:07:28 AM",
+      "config": {
+        "colWidth": 6.0,
+        "enabled": true,
+        "results": {
+          "1": {
+            "graph": {
+              "mode": "table",
+              "height": 289.0,
+              "optionOpen": false,
+              "setting": {
+                "multiBarChart": {
+                  "stacked": false
+                }
+              },
+              "commonSetting": {},
+              "keys": [
+                {
+                  "name": "True Assignment",
+                  "index": 0.0,
+                  "aggr": "sum"
+                }
+              ],
+              "groups": [],
+              "values": [
+                {
+                  "name": "right",
+                  "index": 1.0,
+                  "aggr": "sum"
+                },
+                {
+                  "name": "wrong",
+                  "index": 2.0,
+                  "aggr": "sum"
+                },
+                {
+                  "name": "total",
+                  "index": 3.0,
+                  "aggr": "sum"
+                }
+              ]
+            },
+            "helium": {}
+          },
+          "2": {
+            "graph": {
+              "mode": "multiBarChart",
+              "height": 664.0,
+              "optionOpen": false,
+              "setting": {
+                "multiBarChart": {
+                  "stacked": false
+                },
+                "scatterChart": {
+                  "yAxis": {
+                    "name": "right",
+                    "index": 1.0,
+                    "aggr": "sum"
+                  },
+                  "xAxis": {
+                    "name": "wrong",
+                    "index": 2.0,
+                    "aggr": "sum"
+                  },
+                  "group": {
+                    "name": "True Assignment",
+                    "index": 0.0,
+                    "aggr": "sum"
+                  }
+                },
+                "pieChart": {},
+                "stackedAreaChart": {
+                  "style": "stack"
+                }
+              },
+              "keys": [
+                {
+                  "name": "True Assignment",
+                  "index": 0.0,
+                  "aggr": "sum"
+                }
+              ],
+              "groups": [
+                {
+                  "name": "right",
+                  "index": 1.0,
+                  "aggr": "sum"
+                },
+                {
+                  "name": "wrong",
+                  "index": 2.0,
+                  "aggr": "sum"
+                },
+                {
+                  "name": "total",
+                  "index": 3.0,
+                  "aggr": "sum"
+                }
+              ],
+              "values": [
+                {
+                  "name": "right",
+                  "index": 1.0,
+                  "aggr": "sum"
+                },
+                {
+                  "name": "wrong",
+                  "index": 2.0,
+                  "aggr": "sum"
+                },
+                {
+                  "name": "total",
+                  "index": 3.0,
+                  "aggr": "sum"
+                }
+              ],
+              "commonSetting": {}
+            },
+            "helium": {}
+          },
+          "3": {
+            "graph": {
+              "mode": "table",
+              "height": 300.0,
+              "optionOpen": false
+            },
+            "helium": {}
+          },
+          "4": {
+            "graph": {
+              "mode": "table",
+              "height": 389.0,
+              "optionOpen": false
+            }
+          }
+        },
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false
+        },
+        "editorMode": "ace/mode/python",
+        "editorHide": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "ANGULAR",
+            "data": "\u003ch3\u003ePrototype Model - Average\u003c/h3\u003e\n"
+          },
+          {
+            "type": "TABLE",
+            "data": "True Assignment\tright\twrong\ttotal\nA\t132\t37\t169\nB\t71\t149\t220\nC\t101\t60\t161\nD\t84\t103\t187\nE\t48\t30\t78\nF\t103\t88\t191\nG\t59\t64\t123\nH\t7\t37\t44\nI\t122\t159\t281\nJ\t108\t50\t158\nK\t38\t115\t153\nL\t105\t5\t110\nM\t107\t70\t177\nN\t94\t24\t118\nO\t76\t158\t234\nP\t111\t24\t135\nQ\t98\t95\t193\nR\t85\t74\t159\nS\t39\t86\t125\nT\t76\t43\t119\nU\t114\t8\t122\nV\t104\t82\t186\nW\t95\t82\t177\nX\t58\t136\t194\nY\t26\t16\t42\nZ\t96\t48\t144\n"
+          },
+          {
+            "type": "TABLE",
+            "data": "True Assignment\tright\twrong\ttotal\nTotal\t2157\t1843\t4000\n"
+          }
+        ]
+      },
+      "apps": [],
+      "jobName": "paragraph_1490025923891_-318996557",
+      "id": "20170320-090523_1673574218",
+      "dateCreated": "Mar 20, 2017 9:05:23 AM",
+      "dateStarted": "Mar 24, 2017 12:07:25 AM",
+      "dateFinished": "Mar 24, 2017 12:07:26 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%python\nprint(\"%angular \u003ch3\u003ePrototype Model - Frequency\u003c/h3\u003e\")\nprint(\"%table \" + proto_table_freq)\nprint(\"%table \" + proto_table_freq_total)",
+      "user": "anonymous",
+      "dateUpdated": "Mar 24, 2017 12:07:38 AM",
+      "config": {
+        "colWidth": 6.0,
+        "enabled": true,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "table",
+              "height": 309.0,
+              "optionOpen": false
+            }
+          },
+          "1": {
+            "graph": {
+              "mode": "table",
+              "height": 282.0,
+              "optionOpen": false,
+              "setting": {
+                "multiBarChart": {}
+              },
+              "commonSetting": {},
+              "keys": [
+                {
+                  "name": "True Assignment",
+                  "index": 0.0,
+                  "aggr": "sum"
+                }
+              ],
+              "groups": [],
+              "values": [
+                {
+                  "name": "right",
+                  "index": 1.0,
+                  "aggr": "sum"
+                },
+                {
+                  "name": "wrong",
+                  "index": 2.0,
+                  "aggr": "sum"
+                },
+                {
+                  "name": "total",
+                  "index": 3.0,
+                  "aggr": "sum"
+                }
+              ]
+            },
+            "helium": {}
+          },
+          "2": {
+            "graph": {
+              "mode": "multiBarChart",
+              "height": 673.0,
+              "optionOpen": false,
+              "setting": {
+                "multiBarChart": {}
+              },
+              "commonSetting": {},
+              "keys": [
+                {
+                  "name": "True Assignment",
+                  "index": 0.0,
+                  "aggr": "sum"
+                }
+              ],
+              "groups": [],
+              "values": [
+                {
+                  "name": "right",
+                  "index": 1.0,
+                  "aggr": "sum"
+                },
+                {
+                  "name": "wrong",
+                  "index": 2.0,
+                  "aggr": "sum"
+                },
+                {
+                  "name": "total",
+                  "index": 3.0,
+                  "aggr": "sum"
+                }
+              ]
+            },
+            "helium": {}
+          }
+        },
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false
+        },
+        "editorMode": "ace/mode/python",
+        "editorHide": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "ANGULAR",
+            "data": "\u003ch3\u003ePrototype Model - Frequency\u003c/h3\u003e\n"
+          },
+          {
+            "type": "TABLE",
+            "data": "True Assignment\tright\twrong\ttotal\nA\t129\t32\t161\nB\t51\t260\t311\nC\t89\t44\t133\nD\t64\t127\t191\nE\t33\t84\t117\nF\t95\t138\t233\nG\t46\t32\t78\nH\t55\t558\t613\nI\t58\t0\t58\nJ\t109\t37\t146\nK\t29\t69\t98\nL\t67\t0\t67\nM\t98\t83\t181\nN\t41\t36\t77\nO\t64\t168\t232\nP\t107\t36\t143\nQ\t75\t74\t149\nR\t58\t94\t152\nS\t46\t128\t174\nT\t39\t8\t47\nU\t82\t25\t107\nV\t89\t19\t108\nW\t111\t38\t149\nX\t28\t25\t53\nY\t57\t15\t72\nZ\t90\t60\t150\n"
+          },
+          {
+            "type": "TABLE",
+            "data": "True Assignment\tright\twrong\ttotal\nTotal\t1810\t2190\t4000\n"
+          }
+        ]
+      },
+      "apps": [],
+      "jobName": "paragraph_1490038957143_1945355444",
+      "id": "20170320-124237_764736080",
+      "dateCreated": "Mar 20, 2017 12:42:37 PM",
+      "dateStarted": "Mar 24, 2017 12:07:36 AM",
+      "dateFinished": "Mar 24, 2017 12:07:36 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%md\nSecond model I\u0027d like to show is context model. In context model, you assume that people compare the new item to all instances of all categories of items that they\u0027ve previously defined,\nduring which they find the closest category that the item in question belong to.\n\nSimilarity metric I\u0027d like to use is sometimes referred to as Shepard similarity, which is a simple inversely related similarity metric.\n\n$$S(a,b) \u003d e^{-d(a,b)} $$\n\nWhere a and b are the two items being compared, and d is a distance metric. (which will be Euclidean metric in this case)",
+      "user": "anonymous",
+      "dateUpdated": "Mar 23, 2017 11:34:25 PM",
+      "config": {
+        "colWidth": 12.0,
+        "enabled": true,
+        "results": {},
+        "editorSetting": {
+          "language": "markdown",
+          "editOnDblClick": true
+        },
+        "editorMode": "ace/mode/markdown",
+        "editorHide": true,
+        "tableHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003cdiv class\u003d\"markdown-body\"\u003e\n\u003cp\u003eSecond model I\u0026rsquo;d like to show is context model. In context model, you assume that people compare the new item to all instances of all categories of items that they\u0026rsquo;ve previously defined,\u003cbr/\u003eduring which they find the closest category that the item in question belong to.\u003c/p\u003e\n\u003cp\u003eSimilarity metric I\u0026rsquo;d like to use is sometimes referred to as Shepard similarity, which is a simple inversely related similarity metric.\u003c/p\u003e\n\u003cp\u003e$$S(a,b) \u003d e^{-d(a,b)} $$\u003c/p\u003e\n\u003cp\u003eWhere a and b are the two items being compared, and d is a distance metric. (which will be Euclidean metric in this case)\u003c/p\u003e\n\u003c/div\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "jobName": "paragraph_1490255150483_-1997005258",
+      "id": "20170323-004550_205646726",
+      "dateCreated": "Mar 23, 2017 12:45:50 AM",
+      "dateStarted": "Mar 23, 2017 11:34:25 PM",
+      "dateFinished": "Mar 23, 2017 11:34:25 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%python\ncontext_table, context_table_total, context_percent \u003d result(context)\n\nprint(\"%angular \u003ch3\u003eContext Model\u003c/h3\u003e\")\nprint(\"%table \" + context_table)\nprint(\"%table \" + context_table_total)",
+      "user": "anonymous",
+      "dateUpdated": "Mar 24, 2017 12:07:57 AM",
+      "config": {
+        "colWidth": 12.0,
+        "enabled": true,
+        "results": {
+          "1": {
+            "graph": {
+              "mode": "table",
+              "height": 300.0,
+              "optionOpen": false,
+              "setting": {
+                "multiBarChart": {},
+                "scatterChart": {
+                  "yAxis": {
+                    "name": "right",
+                    "index": 1.0,
+                    "aggr": "sum"
+                  },
+                  "group": {
+                    "name": "True Assignment",
+                    "index": 0.0,
+                    "aggr": "sum"
+                  },
+                  "xAxis": {
+                    "name": "wrong",
+                    "index": 2.0,
+                    "aggr": "sum"
+                  }
+                }
+              },
+              "keys": [
+                {
+                  "name": "True Assignment",
+                  "index": 0.0,
+                  "aggr": "sum"
+                }
+              ],
+              "groups": [],
+              "values": [
+                {
+                  "name": "right",
+                  "index": 1.0,
+                  "aggr": "sum"
+                },
+                {
+                  "name": "wrong",
+                  "index": 2.0,
+                  "aggr": "sum"
+                }
+              ]
+            },
+            "helium": {}
+          },
+          "2": {
+            "graph": {
+              "mode": "multiBarChart",
+              "height": 498.0,
+              "optionOpen": false,
+              "setting": {
+                "multiBarChart": {}
+              },
+              "commonSetting": {},
+              "keys": [
+                {
+                  "name": "True Assignment",
+                  "index": 0.0,
+                  "aggr": "sum"
+                }
+              ],
+              "groups": [],
+              "values": [
+                {
+                  "name": "right",
+                  "index": 1.0,
+                  "aggr": "sum"
+                },
+                {
+                  "name": "wrong",
+                  "index": 2.0,
+                  "aggr": "sum"
+                },
+                {
+                  "name": "total",
+                  "index": 3.0,
+                  "aggr": "sum"
+                }
+              ]
+            },
+            "helium": {}
+          }
+        },
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false
+        },
+        "editorMode": "ace/mode/python",
+        "editorHide": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "ANGULAR",
+            "data": "\u003ch3\u003eContext Model\u003c/h3\u003e\n"
+          },
+          {
+            "type": "TABLE",
+            "data": "True Assignment\tright\twrong\ttotal\nA\t148\t6\t154\nB\t129\t59\t188\nC\t131\t2\t133\nD\t159\t37\t196\nE\t135\t15\t150\nF\t140\t14\t154\nG\t148\t10\t158\nH\t113\t13\t126\nI\t151\t6\t157\nJ\t131\t2\t133\nK\t123\t7\t130\nL\t139\t0\t139\nM\t137\t10\t147\nN\t148\t6\t154\nO\t134\t53\t187\nP\t140\t2\t142\nQ\t147\t7\t154\nR\t153\t45\t198\nS\t146\t4\t150\nT\t140\t2\t142\nU\t152\t7\t159\nV\t128\t6\t134\nW\t135\t7\t142\nX\t147\t25\t172\nY\t134\t4\t138\nZ\t154\t9\t163\n"
+          },
+          {
+            "type": "TABLE",
+            "data": "True Assignment\tright\twrong\ttotal\nTotal\t3642\t358\t4000\n"
+          }
+        ]
+      },
+      "apps": [],
+      "jobName": "paragraph_1490261950515_899898308",
+      "id": "20170323-023910_2082816079",
+      "dateCreated": "Mar 23, 2017 2:39:10 AM",
+      "dateStarted": "Mar 24, 2017 12:07:49 AM",
+      "dateFinished": "Mar 24, 2017 12:07:49 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%md\n\nBecause context model compares new item to every item defined previously, it is considerably more compute intensive compared to prototype model.\nHowever, it is also more accurate, as shown below, since we also consider the effects of outliers.",
+      "user": "anonymous",
+      "dateUpdated": "Mar 23, 2017 11:35:00 PM",
+      "config": {
+        "colWidth": 12.0,
+        "enabled": true,
+        "results": {},
+        "editorSetting": {
+          "language": "markdown",
+          "editOnDblClick": true
+        },
+        "editorMode": "ace/mode/markdown",
+        "editorHide": true,
+        "tableHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003cdiv class\u003d\"markdown-body\"\u003e\n\u003cp\u003eBecause context model compares new item to every item defined previously, it is considerably more compute intensive compared to prototype model.\u003cbr/\u003eHowever, it is also more accurate, as shown below, since we also consider the effects of outliers.\u003c/p\u003e\n\u003c/div\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "jobName": "paragraph_1490337274629_224681113",
+      "id": "20170323-233434_282269387",
+      "dateCreated": "Mar 23, 2017 11:34:34 PM",
+      "dateStarted": "Mar 23, 2017 11:35:00 PM",
+      "dateFinished": "Mar 23, 2017 11:35:00 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%python\nimport matplotlib.pyplot as plt\nimport numpy as np\n\nmodels \u003d (\u0027Prototype-Average\u0027, \u0027Prototype-Frequency\u0027, \u0027Context\u0027)\npos \u003d np.arange(len(models))\nperformance \u003d [round(proto_avg_time), round(proto_freq_time), round(context_time)]\n\nfig, ax \u003d plt.subplots()\nrects \u003d ax.bar(pos, performance, align\u003d\u0027center\u0027, alpha\u003d0.5)\nax.set_xlabel(\u0027Models\u0027)\nax.set_xticks(pos)\nax.set_xticklabels(models)\nax.set_ylabel(\u0027Time (sec)\u0027)\nax.set_title(\u0027Time Took For Each Model to Run\u0027)\n\nfor bar in rects:\n    height \u003d bar.get_height()\n    ax.text(bar.get_x() + bar.get_width()/2.0, 1.05*height, \u0027%d\u0027 % int(height), ha \u003d \u0027center\u0027, va \u003d \u0027bottom\u0027)\n\nplt.show()\nplt.close()",
+      "user": "anonymous",
+      "dateUpdated": "Mar 24, 2017 12:09:25 AM",
+      "config": {
+        "colWidth": 6.0,
+        "enabled": true,
+        "results": {
+          "1": {
+            "graph": {
+              "mode": "table",
+              "height": 589.0,
+              "optionOpen": false
+            }
+          }
+        },
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false
+        },
+        "editorMode": "ace/mode/python",
+        "editorHide": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "\u003cmatplotlib.text.Text object at 0x042A7F30\u003e\n[\u003cmatplotlib.axis.XTick object at 0x04347C30\u003e, \u003cmatplotlib.axis.XTick object at 0x04412930\u003e, \u003cmatplotlib.axis.XTick object at 0x04439CB0\u003e]\n[\u003cmatplotlib.text.Text object at 0x043572D0\u003e, \u003cmatplotlib.text.Text object at 0x0441E310\u003e, \u003cmatplotlib.text.Text object at 0x04439FB0\u003e]\n\u003cmatplotlib.text.Text object at 0x043649D0\u003e\n\u003cmatplotlib.text.Text object at 0x04412CF0\u003e\n... ... ... \u003cmatplotlib.text.Text object at 0x043347B0\u003e\n\u003cmatplotlib.text.Text object at 0x0441E270\u003e\n\u003cmatplotlib.text.Text object at 0x044398F0\u003e\n"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003cdiv style\u003d\u0027width:auto;height:auto\u0027\u003e\u003cimg src\u003ddata:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAlgAAAGQCAYAAAByNR6YAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAIABJREFUeJzt3XtYVWXe//HPRrDyLCqgiJJGCIoKeTYLCbB01CzFAykesklrpswKbXoSmwqsGRudyTInxXrMRDNhLs9aaFmj5aFSzOyAyjZBE/CAmsL9+8Of6xHP0tIN2/frurhinb9r7UX7473utZbDGGMEAAAA23i4ugAAAAB3Q8ACAACwGQELAADAZgQsAAAAmxGwAAAAbEbAAgAAsBkBCwAAwGYELAAAAJsRsAAAAGxGwAIAALAZAQsAAMBmBCwAAACbEbAAAABsRsACAACwGQELAADAZgQsAAAAmxGwAAAAbEbAAgAAsBkBCwAAwGYELAAAAJsRsAAAOMv333+v8PBwRUREKDw8XDVr1tTUqVP19ddfq2PHjgoPD1e7du301VdflVpu9+7dql69uiZPnuyiylGeOIwxxtVFAABQHpWUlKhhw4Zav369Hn74YY0dO1axsbFaunSpXn31VX3yySfWvP369ZOHh4fat2+vp556yoVVozzwdHUBAACUV6tWrVLTpk0VEBAgDw8PFRYWSpIKCgrk7+9vzZeenq4mTZqoatWqrioV5QwBCwCAi5g3b54GDhwoSXr99dfVrVs3jR07VsYYff7555Kko0eP6tVXX9XKlSv12muvubJclCP0wQKukeTkZD3yyCOuLqPMli9frqCgIFeXcU2cOHFCHh4e2rt3r0vr6Nixo95///3Lzlde6r3RnDx5UhkZGerXr58k6c0339SUKVO0e/duvf766xo+fLgkKSkpSWPGjFGVKlUkSfS8gUTAAsqsevXqqlGjhmrUqKFKlSqpSpUq1ri5c+dq/Pjxevvtt69pDZ999pm1zWrVqsnDw0M1atSwxuXk5Pyu9Tscjiuab/r06fLy8iq17WeeeeZ3bfuM8ePHq3Llytaxrl69uho0aPC713ul+yZJ48aNk4eHh2bMmFFq/KRJk+Th4aFXX331d9dzOZeq90qD2sX4+fmpatWqqlGjhvz9/TVy5EidOHGizOtzF0uXLtUdd9yhevXqSZJmz56t+++/X5LUt29fffnll5Kk9evX69lnn1WTJk30j3/8Q8nJyZo2bZrL6kb5QMACyujw4cM6dOiQDh06pMaNG2vx4sXWuDOXFK61O++809rmtm3b5HA4VFhYaI1r2LDhdalDkrp27apDhw5Z2y7LpZLi4uILjh86dKh1rA8fPmxLS87VtDI4HA4FBwfr3XffLTX+vffeU3Bw8O+u5Upcy1YRh8OhVatW6dChQ/rqq6/0+eef629/+9s1215FMXfu3FJ/y/7+/lqzZo0kafXq1VYL79q1a/XTTz/pp59+0pNPPqnnnntOo0ePdknNKD8IWIANjDHnfQFOnDhRgwcPliTt2rVLHh4eSk1NVaNGjVSnTh1Nnz5dX331lVq1aiVvb2/96U9/KrX8zJkzFRoaqjp16ui+++7T7t27r7iWs+3Zs0c9evRQnTp11KxZs1Ih4fjx43rsscfUoEEDNWrUSM8+++xFQ85rr72m1q1bKy8v74rqOCM/P1+DBg2Sj4+PmjZtWip4TZ8+Xffcc48ef/xxeXt7a9KkSVe1bkkaPXq0AgICVLNmTXXo0EHr16+3phUXF2vixIlq2rSpatWqpfbt25eqf/HixbrttttUp06dy9711blzZ/3yyy/6+eefJUkbN25U5cqVFRYWVmq+N954Q7fddpvq1aunvn37nre922+/Xd7e3ho7dux525g+fbqaNWumunXrqmfPnlcUJJ9++ml9+eWXevjhh0u1HK5Zs0Z33HGHateurU6dOp33SIFznTlv6tevr+joaG3ZssWadm4L2fTp0xUTEyPp/y5fzpgx44qPZUVQVFSkVatW6YEHHrDGzZgxQ2PHjlV4eLief/75a95CjYqNgAVcQ+de1tmwYYN++OEHzZs3T08++aReeeUVffzxx9q6davS0tL06aefSjp9R1JKSooWLVqk/fv3q0uXLmVuFevXr59CQkKUm5urOXPmaMyYMfriiy8kSS+88IK2bt2qbdu2aePGjcrMzLzg5a7nnntOCxcu1Jo1a+Tj43NV2//jH/+o4uJi7dq1SytWrNCbb76puXPnWtM//fRTRURE6Ndff71g6LicTp06adu2bTp48KB69+6tfv36WSHxlVdeUUZGhlatWqWCggK9/fbbuvnmm61lly9frq+//lobN27UrFmztHbt2otux8PDQw899JBmz54tSXr33XeVkJBQKtAuWbJEL7/8stLT0+V0OlWnTh0rZP/yyy/q37+/Xn/9de3fv1/16tUrFXrmzZunqVOnavHixcrNzVV4eLgeeuihy+7/3/72N7Vt21bvvPOO1XK4f/9+9erVS88995x+/fVX/fGPf1T37t11+PDhy65v9+7dWrFixWX73517bl/NsawIqlSpov3796t69erWuDNBdfPmzfriiy8UHh5+3nITJkxwi4AJGxgAv1tgYKBZvXp1qXFJSUlm8ODBxhhjsrOzjYeHh/nll1+s6XXq1DFpaWnW8IMPPmimTJlijDHmvvvuMzNnzrSmFRcXmypVqpjdu3dftIYz2yguLrbG7dy509xyyy3m+PHj1rgxY8aYUaNGGWOM8ff3N5mZmda09PR0ExISYowxZtmyZaZp06bmscceM1FRUebo0aMX3fZbb71lvLy8TO3atU2tWrVM7dq1zddff21OnDhhKlWqZLKzs615p0yZYu677z5rueDg4Iuu1xhjxo0bZ2666SZTu3Zt66d79+4XnLekpMRUqVLFfP/998YYYxo3bmxWrlx53nzHjx83DofDbNq0yRrXq1cv6/hfqIaRI0eaH374wdx2223mt99+Mw0aNDB5eXmmb9++ZtKkScYYY+Lj482ECROs5QoKCkylSpVMbm6uefvtt03Xrl2tacXFxcbHx8fMmTPHGGNM165dzfvvv29N/+2334yXl5fJy8uz6nU6nResr0OHDtZ6jDFmxowZ5u677y41T3h4uJk3b94Fl/fz8zM1atQw1atXNw6Hw9x3333myJEjF13/W2+9ZWJiYsp0LIEbBS1YwHV0duvPLbfcIl9f31LDR44ckXT6kuITTzwhb29veXt7q06dOnI4HHI6nVe1vb1796pevXq66aabrHGNGze21rNv3z41atTogtMkKS8vT6mpqXr++eetO6QuJjIyUgcPHlR+fr4OHjyoli1bat++fTLGKCAg4KLbOHvaxQwZMkQHDx60fhYvXmxNS05OVrNmzVS7dm15e3vrxIkTOnDggCTJ6XSqSZMmF13v2ce/SpUq1vG/mKZNm8rHx0d/+ctfFBERYXV+PmPv3r1q3LixNVyzZk1Vr15dTqdTe/fuLbWvHh4epZ6jtGvXLj366KPWZ+7j46PKlSuX6UaFc+uQzj/u51q2bJkOHTqklStXauvWrTp48OBVbfNqjyXg7ghYQDkUEBCg6dOnW4EiPz9fR44cUYcOHa5qPQ0aNND+/ftL3RG2e/du64vdz89Pu3bt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ulSjR4+WMcaenQEAADekchewHnvsMf31r39VSEiI+vXrp9GjR2v48OHq0qWLOnXqpMOHD6tv376XXEdOTo6WLFmihx9+2BqXnp6uhIQESVJCQoIWLVokScrIyNCAAQPk6empwMBABQUFacOGDdduBwEAgNsrd8/Bat26tdLS0nTkyBF99dVX+uWXX3TLLbcoJCREwcHBV7SOMWPG6LXXXit1GTA3N1e+vr6SJD8/P+Xl5UmSnE6nOnbsaM3n7+8vp9Np4x4BAIAbTbkLWGdUq1ZNkZGRV73c4sWL5evrq9atWyszM/Oi8515xyEAAIDdym3AKqt169YpIyNDS5Ys0bFjx3T48GENHjxYfn5+VivWvn375OPjI+l0i9WePXus5XNycuTv73/R9SclJVm/R0ZGlikEAgDg7jIzMy/Z0OHuHMaNe3SvWbNGf//735WRkaFnn31WderUUWJioiZNmqT8/HylpKQoKytL8fHxWr9+vZxOp2JiYrRz584LtnA5HA46wAPAWYYOTVJgYJKry8B1kp2dpNTUpDIte6N9h5b7FqyioiJVqVLld69n3LhxiouL08yZM9W4cWOlpaVJkkJDQxUXF6fQ0FB5eXlp2rRpXD4EAAC/S7ltwfr888/18MMP68iRI9q9e7e+/vprTZ8+XdOmTXNZTTda+gaAy6EF68ZCC9aVK3ePaThjzJgxWr58uerUqSNJatWqldauXeviqgAAAC6v3AYsSQoICCg1XKlSJRdVAgAAcOXKbR+sgIAAff7553I4HDp58qSmTJmikJAQV5cFAABwWeW2Beutt97SG2+8IafTKX9/f23ZskVvvPGGq8sCAAC4rHLbglW3bt0reucgAABAeVNuA9bPP/+sf/7zn8rOztapU6es8RkZGS6sCgAA4PLKbcC6//77NWLECPXs2VMeHuX2SiYAAMB5ym3Auvnmm/XnP//Z1WUAAABctXIbsJ544glNnDhRsbGxuummm6zxERERLqwKAADg8sptwPr222/13nvv6eOPP7YuETocDn388ccurgwAAODSym3Amj9/vn766SdVrlzZ1aUAAABclXLbe7xFixYqKChwdRkAAABXrdy2YBUUFKhZs2Zq27ZtqT5YPKYBAACUd+U2YE2cONHVJQAAAJRJuQ1Yd999t6tLAAAAKJNy1wfrzjvvlCRVr15dNWrUsH7O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Du1du3ZVv379FBISYp3n//znP7V371517dpV99xzjyRpxYoV6tSpk9q0aaP+/furqKhIhw4dUrNmzbRz505Jpx/A/M4771zwbwduyKDCqFatmjHGmJMnT5revXubt956y2RnZxsPDw+zYcMGY4wxe/fuNY0aNTK//vqrKS4uNlFRUSY9Pd0YY0z16tWtdW3cuNG0bNnSHDt2zBw5csQ0b97cbNmyxWRnZ5uwsDBrvjVr1pj777/fGGNMYWGhadKkiSkuLjapqammQYMGJj8/3xw7dsy0aNHCbNy40Wzfvt307NnTnDp1yhhjzOjRo8177713wf0ZOXKkmTNnjjl06JBp2LChtcyTTz5pUlNTjTHGrF+/3sTExBhjjBk0aJBZt26dMcaY3bt3m5CQEGOMMUlJSaZNmzbmxIkTxhhjjh07Zv2+c+dO06ZNG2OMMfPnzzc9evQwxhizb98+U7t2bfPhhx+akydPmk6dOpkDBw4YY4yZN2+eGT58eFk+ogrHnc6pzMxMU7NmTRMeHm7Cw8PNK6+8YowxZujQoaZnz57WfM8995yZM2eOMcaYgoICc/vtt5uioiIzefJkM2LECGOMMd98843x8vIyGzduPG8/FyxYYIYNG2aMufQ52blzZ3Py5Elz4MABU6dOHXPq1CmzdetWExwcbA4ePGiMMSY/P98YY8zw4cOtY/r222+bp59++so/RFyxqVOnmqeeeuq88R9++KGJjY01xhiTm5trGjVqZPbt22cyMzNNrVq1zN69e01JSYnp2LGj9Xnfeuut1ud44MABc9ddd5mioiJjjDGTJk0yL774ojHGmJUrV5qOHTuaDz74wNx3333WNs8+p+CeuIuwAjnzLx7pdGvDiBEj5HQ6FRgYqLZt20qSvvzyS3Xt2tVqto6Pj9fatWvVq1evUv+6/+yzz9SnTx/dfPPNkqQHHnhAn376qXr27Flqm3fddZcee+wx/frrr1qwYIEefPBBeXicbviMiYlRrVq1JEkPPvigPvvsM1WqVEkbN25U27ZtZYzR8ePH5evre96+nDx5UkuWLNHrr7+uqlWrql27dlq+fLm6d++uuLg4vfjii0pISNAHH3yg/v37S5JWrVql7du3W/tx5MgRFRUVSZJ69eqlypUrS5J+++03Pf7449qyZYsqVapk/etx3bp16tevnyTJ19dXXbt2lSTt2LFDW7duVUxMjIwxKikpUYMGDcr+QVUg7nROnVn3hS4RnvncpdMtDf/5z3/02muvSTp9vuzevVtr1661XhZ9phXuDHORFrNLnZM9evSQp6en6tSpI19fX+Xm5uqTTz5Rv379VLt2bUmy9nXEiBF67bXX1KtXL82aNUv//ve/L7g9XBufffaZBg4cKEny8fFRZGSkvvzyS1WvXl3t2rVT/fr1JUmtW7dWdna2OnXqZL1rVTr9LMWsrCx17txZxhidPHlSHTt2lCRFR0dr/vz5euyxx65L1wuUHwSsCqRKlSrWJYuzVa1atdTwxb4MymrIkCF677339MEHHyg1NdUaf3a/HHNWP52hQ4fq5ZdfLrWORYsWaeLEiXI4HPr3v/+tvXv3qrCwUGFhYTLG6NixY6pSpYq6d++ujh076scff9SBAwe0aNEivfDCC9Y21q9fLy8vr/NqPPsYvP766/Lz89M333yj4uJi3XLLLZfcP2OMWrRooXXr1l31sano3OmcupRz9+fDDz9UUFDQJZc5e5/Pruvsjs2XOidvuukm6/dKlSrp1KlT5633jE6dOik7O1tr1qxRSUmJQkNDL1kbyqZ58+ZasGDBZec7+zO62Od47vyxsbGaM2fOBadt375dVatW1a+//mqFNbv/plD+0AerArnYH+TZ49u1a6e1a9fq4MGDKi4u1ty5cxUZGSlJqly5stWvo0uXLlq0aJGOHz+uo0eP6qOPPlKXLl0u2PEyISFB//jHP+RwONSsWTNr/MqVK1VQUKBjx45p0aJF6ty5s6KiorRgwQLt379fkpSfn6/du3fr/vvv1+bNm7Vp0yZFRERo7ty5euedd/TTTz/p559/1k8//aQVK1ZYX159+vTRU089pdDQUOtf+bGxsZoyZYq1/a+//vqCx6OwsND6n9i7775r7XPnzp314Ycfyhij3NxcZWZmSpKCg4O1f/9+q6/WqVOnlJWVdZlPwz240zl1pbp162b1D5OkLVu2SDrd+nXmC3Lr1q365ptvrHn8/Py0Y8cOlZSU6KOPPrLGX+k5eeZ4ntmXgwcPWvtyxuDBgzVo0CANHz78ivcFVycqKkq//fZbqUD+7bffqlatWpo3b55KSkq0f/9+ffrpp2rXrt0l13X2DSIdOnTQunXr9OOPP0qSioqKrJbzyZMnKzQ0VO+//76GDRtm/b2c/bcD90TAqkAudifX2eP9/PyUkpKiyMhIhYeHW7chS9IjjzyisLAwDR482Opg27ZtW3Xs2FGPPPKIWrVqJW9vb3Xu3FktW7a0XhXk4+OjkJCQ817Y3K5dOz3wwANq3bq1+vXrp4iICIWEhOill15SbGysWrVqpdjYWO3bt6/UcseOHbMuB55RpUoVdenSRf/5z38kSXFxcZozZ44GDBhgzTNlyhR99dVXatWqlVq0aKHp06df8HiMHj1aqampCg8P1/fff2+1Xjz44INq2LChmjdvriFDhuiOO+5QzZo15eXlpQULFigxMVGtW7dWeHi41VnZ3bnLOXU1+/j888/r5MmTatmypcLCwqwW0lGjRunIkSNq3ry5kpKS1KZNG2uZ5ORk9ejRQ3feeWepy8dXek6eqSE0NFR/+ctfdPfddys8PFxjx4615omPj1dBQUGpcx72++ijj7Ry5UrddtttCgsL03PPPaf4+Hi1bNlSrVq1UnR0tF577TX5+Pict+zZ59LIkSN177336p577lHdunU1a9YsDRw4UK1atVKnTp20Y8cOff/995o5c6YmT56szp076+6779ZLL71kLX/mbwfuicc04LKKiorUqlUrbdq0ybqbavbs2dq4cWOploCK4OjRo6pataoOHjyo9u3ba926dRf8HymurYpwTnXt2lV///vfr6p17PdYsGCBdTclgIqPPli4pNWrV2vEiBEaO3ZsqVvVK6o//OEPKigo0MmTJ/XCCy8QrlygopxT1/Pl7n/+85+1bNkyLVmy5LptE8C1RQsWAACAzeiDBQAAYDMCFgAAgM0IWAAAADYjYAEAANiMgAWgXPDw8NCQIUOs4eLiYtWrV0+9evW6qvXceuut1oM8f888APB7ELAAlAtVq1bV1q1bdeLECUmnn+oeEBBw1eu5kscrXM9HMAC4MRGwAJQb3bt31+LFiyVJc+fOtV7AK51+rUyfPn2sJ2WfeXHuwYMH1a1bN4WFhWnkyJGlXvMzZ84ctW/fXhERERo1apQ17cx/i4qK9Ic//EHh4eFq2bKl5s+ff712FYCbI2ABKBccDocGDBiguXPn6sSJE/rmm2/Uvn17a/qECRMUERGhr7/+Wi+//LJ1OXHixInq0qWLvv32W/Xp00e7d++WJH333XeaN2+ePv/8c23atEkeHh7nvYx32bJl8vf31+bNm/XNN9/o3nvvvX47DMCt8SR3AOVGixYtlJ2drblz56pHjx6lWqM+++wzLVy4UNLp19gcPHhQhw8f1tq1a60XMHfv3l21a9eWdPqJ8Zs2bVLbtm1ljNHx48fl5+dXanthYWF6+umnNX78eOtdgwBgBwIWgHKlV69eeuaZZ5SZmakDBw5cct4L9aU6+zJgQkKCXn755YsuHxQUpE2bNmnJkiV6/vnnFR0dreeff/737QAAiEuEAMqJM8Fo+PDhmjBhgpo3b15qepcuXfS///u/kqTMzEzVrVtX1apV01133WVd+lu6dKkKCgokSffcc48WLFig/fv3Szrdh+vM5cMzfvnlF91yyy0aNGiQnnnmGW3atOma7iOAGwctWADKhTOtUf7+/nr88cfPm56UlKThw4erVatWqlq1qmbPni3pdN+sgQMH6oMPPlCnTp3UqFEjSVJISIheeuklxcbGqqSkRJUrV9Ybb7yhRo0aWdv69ttv9cwzz8jDw0OVK1fWm2++eZ32FoC742XPAAAANuMSIQAAgM0IWAAAADYjYAEAANiMgAUAAGAzAhYAAIDNCFgAAAA2I2ABAADYjIAFAABgMwIWAACAzQhYAAAANiNgAQAA2IyABQAAYLP/BzuFc7UPv7wNAAAAAElFTkSuQmCC style\u003d\u0027width\u003dauto;height:auto\u0027\u003e\u003cdiv\u003e\n"
+          }
+        ]
+      },
+      "apps": [],
+      "jobName": "paragraph_1490295292744_654617563",
+      "id": "20170323-115452_1333134274",
+      "dateCreated": "Mar 23, 2017 11:54:52 AM",
+      "dateStarted": "Mar 24, 2017 12:09:16 AM",
+      "dateFinished": "Mar 24, 2017 12:09:20 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%python\nmodels \u003d (\u0027Prototype-Average\u0027, \u0027Prototype-Frequency\u0027, \u0027Context\u0027)\npos \u003d np.arange(len(models))\nperformance \u003d [proto_avg_percent, proto_freq_percent, context_percent]\n\nfig, ax \u003d plt.subplots()\nrects \u003d ax.bar(pos, performance, align\u003d\u0027center\u0027, alpha\u003d0.5)\nax.set_xlabel(\u0027Models\u0027)\nax.set_xticks(pos)\nax.set_xticklabels(models)\nax.set_ylabel(\u0027Accuracy (%)\u0027)\nax.set_title(\u0027Accuracy of Each Model\u0027)\n\nfor bar in rects:\n    height \u003d bar.get_height()\n    ax.text(bar.get_x() + bar.get_width()/2.0, 1.05*height, \u0027%f\u0027 % float(height), ha \u003d \u0027center\u0027, va \u003d \u0027bottom\u0027)\n\nplt.show()\nplt.close()",
+      "user": "anonymous",
+      "dateUpdated": "Mar 24, 2017 12:10:54 AM",
+      "config": {
+        "colWidth": 6.0,
+        "enabled": true,
+        "results": {
+          "1": {
+            "graph": {
+              "mode": "table",
+              "height": 589.0,
+              "optionOpen": false
+            }
+          }
+        },
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false
+        },
+        "editorMode": "ace/mode/python",
+        "editorHide": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "\u003cmatplotlib.text.Text object at 0x042B0CB0\u003e\n[\u003cmatplotlib.axis.XTick object at 0x044BE770\u003e, \u003cmatplotlib.axis.XTick object at 0x044B24B0\u003e, \u003cmatplotlib.axis.XTick object at 0x04572270\u003e]\n[\u003cmatplotlib.text.Text object at 0x044D4AF0\u003e, \u003cmatplotlib.text.Text object at 0x044DF8B0\u003e, \u003cmatplotlib.text.Text object at 0x04572570\u003e]\n\u003cmatplotlib.text.Text object at 0x044C8F70\u003e\n\u003cmatplotlib.text.Text object at 0x044DF270\u003e\n... ... ... \u003cmatplotlib.text.Text object at 0x04564FD0\u003e\n\u003cmatplotlib.text.Text object at 0x04564FF0\u003e\n\u003cmatplotlib.text.Text object at 0x04572050\u003e\n"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003cdiv style\u003d\u0027width:auto;height:auto\u0027\u003e\u003cimg src\u003ddata:image/png;base64,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8smr/ybiqr311lvG448/fsn4jz76yIiKijIMwzAOHTpk1K1b1zh48KCRmppqeHp6GgcOHDBsNpvRrl078/tdv3598/uYk5NjdO7c2Th9+rRhGIYxZcoUY9KkSYZhGMYXX3xhtGvXzkhKSjLuuecec50XH1NwTk5/F6EzufAXj3S+tyEuLk7Z2dmqV6+ewsPDJUkbNmxQZGSk2W09ePBgffPNN4qOjrb7637t2rXq27evbr31VklSv3799O233+ree++1W2fnzp31yCOP6OjRo1q6dKn69+8vV9fzHZ933323PD09JUn9+/fX2rVr5ebmpo0bNyo8PFyGYaigoKDER14UFRVpxYoV+ve//63KlSurdevWWrVqlXr06KH7779fkyZNUmxsrJKSksznk3355Zf65ZdfzO04efKkTp8+Len8ozY8PDwkSYWFhYqPj9fmzZvl5uZm/vW4bt063XfffZKkWrVqKTIyUpK0c+dO/fTTT7r77rtlGIZsNptq1679179R5YgzHVMXll3SKcIL33fpfE/Dp59+qqlTp0o6f7xkZWXpm2++0WOPPSZJZi/cBcZlesyudEz27NlTFSpUUPXq1VWrVi0dOnRIX3/9te677z55eXlJkrmtcXFxmjp1qqKjozV37lz997//LXF9uDHWrl2rgQMHSpJq1qypiIgIbdiwQbfddptat24tX19fSVLLli2VkZGh9u3byzAM8/u+fv16bd++XR06dJBhGCoqKlK7du0kSV27dtWSJUv0yCOPlMqlFyg7CFjlSKVKlcxTFherXLmy3fDlfhn8VcOGDdOCBQuUlJSkefPmmeMvvi7HuOg6neHDh+ull16yW8by5cs1ceJEubi46L///a8OHDig48ePKzg4WIZh6MyZM6pUqZJ69Oihdu3aae/evcrJydHy5cv1wgsvmOv44Ycf5O7ufkmNF++Df//73/Lx8dHWrVtVXFysihUrXnH7DMNQ8+bNtW7dumveN+WdMx1TV/LH7fnoo48UGBh4xXku3uaL67r4wuYrHZO33HKL+dnNzU3nzp27ZLkXtG/fXhkZGVqzZo1sNpuaNm16xdrw1zRr1kxLly7903YXf48u9338Y/uoqCgtXLiwxGm//PKLKleurKNHj5phzeqfKZQ9XINVjlzuB/Li8a1bt9Y333yj3NxcFRcXKzExUREREZIkDw8P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 style\u003d\u0027width\u003dauto;height:auto\u0027\u003e\u003cdiv\u003e\n"
+          }
+        ]
+      },
+      "apps": [],
+      "jobName": "paragraph_1490324522408_971787756",
+      "id": "20170323-200202_1559903098",
+      "dateCreated": "Mar 23, 2017 8:02:02 PM",
+      "dateStarted": "Mar 24, 2017 12:09:35 AM",
+      "dateFinished": "Mar 24, 2017 12:09:40 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "user": "anonymous",
+      "config": {},
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "apps": [],
+      "jobName": "paragraph_1490337049090_2048869238",
+      "id": "20170323-233049_729910664",
+      "dateCreated": "Mar 23, 2017 11:30:49 PM",
+      "status": "READY",
+      "progressUpdateIntervalMs": 500
+    }
+  ],
+  "name": "Classification",
+  "id": "2CD999WB6",
+  "angularObjects": {
+    "2CE74156Y:shared_process": [],
+    "2CBV9PYNY:shared_process": [],
+    "2CDUZHBXD:shared_process": [],
+    "2CC3R7X3H:shared_process": [],
+    "2CD4MJCEZ:shared_process": [],
+    "2CC6XHHVN:shared_process": [],
+    "2CB62JQBR:shared_process": [],
+    "2CDDMAH4G:shared_process": [],
+    "2CAKJCHMZ:shared_process": [],
+    "2CDCS4U8U:shared_process": [],
+    "2CCJUNK5S:shared_process": [],
+    "2CDF63KF1:shared_process": [],
+    "2CDABDZUM:shared_process": [],
+    "2CD1QW5AQ:shared_process": [],
+    "2CB9NW2SJ:shared_process": [],
+    "2CAHDXAU7:shared_process": [],
+    "2CARG67TM:shared_process": [],
+    "2CBEMDBY4:shared_process": [],
+    "2CBFDF53W:shared_process": []
+  },
+  "config": {},
+  "info": {}
+}
